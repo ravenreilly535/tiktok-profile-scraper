@@ -11,8 +11,11 @@ module.exports = async function handler(req, res) {
     const url = `https://www.tiktok.com/@${username}`;
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Referer': 'https://www.tiktok.com/',
+        'Cookie': 'tt_webid_v2=1234567890;', // dummy cookie, may help bypass some restrictions
       }
     });
 
@@ -24,7 +27,6 @@ module.exports = async function handler(req, res) {
 
     const $ = cheerio.load(html);
 
-    // TikTok abhi profile info ko <script id="__NEXT_DATA__" type="application/json"> me rakhta hai
     const scriptTag = $('#__NEXT_DATA__').html();
     if (!scriptTag) {
       return res.status(404).json({ error: "Profile data script not found" });
@@ -32,7 +34,6 @@ module.exports = async function handler(req, res) {
 
     const jsonData = JSON.parse(scriptTag);
 
-    // Navigate karke user data extract karte hain
     const userData = jsonData.props?.pageProps?.userInfo?.user;
 
     if (!userData) {
