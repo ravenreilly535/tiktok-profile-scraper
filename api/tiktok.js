@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
-import cheerio from 'cheerio';
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { username } = req.query;
   if (!username) {
     return res.status(400).json({ error: "Username is required" });
