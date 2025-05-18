@@ -24,28 +24,29 @@ module.exports = async function handler(req, res) {
 
     const $ = cheerio.load(html);
 
-    const scriptContent = $('#SIGI_STATE').html();
-    if (!scriptContent) {
-      return res.status(404).json({ error: "Profile data not found" });
+    // TikTok abhi profile info ko <script id="__NEXT_DATA__" type="application/json"> me rakhta hai
+    const scriptTag = $('#__NEXT_DATA__').html();
+    if (!scriptTag) {
+      return res.status(404).json({ error: "Profile data script not found" });
     }
 
-    const data = JSON.parse(scriptContent);
+    const jsonData = JSON.parse(scriptTag);
 
-    const user = data.UserModule.users[username];
-    const stats = data.UserModule.stats[username];
+    // Navigate karke user data extract karte hain
+    const userData = jsonData.props?.pageProps?.userInfo?.user;
 
-    if (!user || !stats) {
+    if (!userData) {
       return res.status(404).json({ error: "User info missing" });
     }
 
     const profile = {
-      username: user.uniqueId,
-      displayName: user.nickname,
-      avatar: user.avatarLarger,
-      bio: user.signature,
-      followers: stats.followerCount,
-      following: stats.followingCount,
-      likes: stats.heartCount,
+      username: userData.uniqueId,
+      displayName: userData.nickname,
+      avatar: userData.avatarLarger,
+      bio: userData.signature,
+      followers: userData.followerCount,
+      following: userData.followingCount,
+      likes: userData.totalFavorited,
     };
 
     res.status(200).json(profile);
